@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LONGRDEZ HUB</title>
+<style>
+:root{--c:#b86bff;--b:#ff00ee;--bg:#0a0109;--ok:#00ffaa}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Courier New',monospace}
+html,body{background:var(--bg);color:var(--c)}
+body{min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:center;padding:20px}
+
+/* ===== NỀN ===== */
+#matrix{position:fixed;inset:0;width:100%;height:100%;opacity:.14;pointer-events:none}
+.glow{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;animation:pg 8s infinite alternate}
+.g1{top:-10%;left:-5%;width:500px;height:500px;background:radial-gradient(circle,rgba(212,0,255,.3),transparent 70%)}
+.g2{bottom:-10%;right:-5%;width:600px;height:600px;background:radial-gradient(circle,rgba(134,0,255,.22),transparent 70%);animation-delay:-4s}
+@keyframes pg{from{opacity:.55;transform:scale(.9)}to{opacity:1;transform:scale(1.12)}}
+.scan{position:fixed;left:0;width:100%;height:8px;background:linear-gradient(transparent,rgba(134,0,255,.35),transparent);pointer-events:none;z-index:50;animation:sc 3.5s linear infinite}
+@keyframes sc{from{top:-10%}to{top:110%}}
+
+/* ===== INTRO ===== */
+#intro{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse at 50% 45%,#2b042c,#0a0109 70%);overflow:hidden;transition:opacity 1.1s,visibility 1.1s,transform 1.1s,filter 1.1s}
+#intro.done{opacity:0;visibility:hidden;transform:scale(1.12);filter:blur(8px)}
+#fx{position:absolute;inset:0;width:100%;height:100%}
+.aurora{position:absolute;left:0;right:0;bottom:0;height:75%;opacity:0;transition:opacity 2s;filter:blur(6px);
+ background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(134,0,255,.16) 24px,rgba(217,80,255,.34) 30px,transparent 40px 70px);
+ -webkit-mask:linear-gradient(to top,#000,transparent);mask:linear-gradient(to top,#000,transparent);animation:aur 5s ease-in-out infinite alternate}
+@keyframes aur{from{transform:translateX(-18px) scaleY(.85)}to{transform:translateX(18px) scaleY(1.08)}}
+#intro.s2 .aurora,#intro.s3 .aurora{opacity:1}
+.stage{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(.6);opacity:0;transition:opacity 1.2s,transform 1.4s cubic-bezier(.2,.9,.2,1);pointer-events:none}
+.hud{width:min(92vw,520px);height:min(92vw,520px)}
+.logo{width:min(46vw,210px);height:min(46vw,210px);filter:drop-shadow(0 0 14px var(--c)) drop-shadow(0 0 40px var(--b))}
+#intro.s2 .stage{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#intro.s3 .stage{opacity:0;transform:translate(-50%,-50%) scale(1.25)}
+.hud .r1{animation:spin 24s linear infinite}.hud .r2{animation:spin 16s linear infinite reverse}.hud .r3{animation:spin 40s linear infinite}
+.hud g{transform-origin:0 0;transform-box:view-box}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo path{fill:rgba(134,0,255,.12);stroke:#dbbbff;stroke-width:2;stroke-linejoin:round;stroke-dasharray:420;stroke-dashoffset:420}
+#intro.s2 .logo path{animation:draw 2.2s ease forwards}
+#intro.s2 .logo path:nth-child(2),#intro.s2 .logo path:nth-child(3){animation-delay:.25s}
+#intro.s2 .logo path:nth-child(4),#intro.s2 .logo path:nth-child(5){animation-delay:.5s}
+@keyframes draw{to{stroke-dashoffset:0;fill:rgba(134,0,255,.28)}}
+.brand{position:absolute;left:0;right:0;top:66%;text-align:center;opacity:0;transform:translateY(20px);transition:all 1.2s .6s}
+.brand b{display:block;font-size:clamp(30px,8vw,64px);letter-spacing:.28em;margin-right:-.28em;color:#fff;text-shadow:0 0 12px var(--c),0 0 40px var(--b)}
+.brand i{font-style:normal;font-size:12px;letter-spacing:.6em;color:#de7fff}
+#intro.s2 .brand{opacity:1;transform:none}
+#intro.s3 .brand{opacity:0;transition-delay:0s}
+.tri{position:absolute;width:0;height:0;border:9px solid transparent;border-bottom:15px solid rgba(134,0,255,.35);opacity:0;animation:fl 6s ease-in-out infinite}
+#intro.s2 .tri{opacity:1}
+@keyframes fl{50%{transform:translateY(-26px) rotate(25deg)}}
+.boot{position:absolute;left:14px;top:12px;font-size:10px;line-height:1.5;color:#b75fd8;letter-spacing:1px}
+#skip{position:absolute;right:14px;top:12px;background:none;border:1px solid rgba(134,0,255,.4);color:#de7fff;padding:6px 12px;border-radius:14px;font-size:11px;cursor:pointer}
+
+/* Giai đoạn 3: tổ ong + 3 nút lục giác */
+.hive{position:absolute;inset:0;opacity:0;transition:opacity 1.5s;-webkit-mask:radial-gradient(circle at 50% 50%,#000,transparent 65%);mask:radial-gradient(circle at 50% 50%,#000,transparent 65%)}
+#intro.s3 .hive{opacity:.9}
+.hexrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:0;opacity:0;transition:opacity 1s .6s}
+#intro.s3 .hexrow{opacity:1}
+.hn{display:flex;flex-direction:column;align-items:center;gap:10px;width:clamp(78px,22vw,130px)}
+.hn svg{width:clamp(56px,16vw,84px);filter:drop-shadow(0 0 8px var(--c))}
+.hn polygon{fill:rgba(77,0,80,.7);stroke:#862a96;stroke-width:2.5;transition:all .5s}
+.hn span{font-size:clamp(9px,2.6vw,12px);letter-spacing:2px;color:#912fa8;transition:color .5s}
+.hn.on polygon{stroke:var(--c);fill:rgba(134,0,255,.22)}
+.hn.on span{color:#fff;text-shadow:0 0 8px var(--c)}
+.hn text{fill:#912fa8;font-size:22px;text-anchor:middle;transition:fill .5s}.hn.on text{fill:#fff}
+.ln{width:clamp(24px,8vw,60px);height:2px;background:#53165c;margin-bottom:26px;position:relative;overflow:hidden}
+.ln::after{content:'';position:absolute;inset:0;background:var(--c);transform:translateX(-100%);transition:transform .8s}
+.ln.on::after{transform:none}
+
+/* ===== KHUNG CHÍNH ===== */
+.master{position:relative;z-index:10;width:100%;max-width:1100px;display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:30px;border-radius:22px;
+ background:rgba(24,4,23,.62);backdrop-filter:blur(18px);box-shadow:0 0 60px rgba(212,0,255,.2);opacity:0;transform:translateY(24px) scale(.97);transition:all 1.1s cubic-bezier(.2,.9,.2,1);will-change:transform}
+.master.show{opacity:1;transform:none}
+.master::before{content:'';position:absolute;inset:-2px;border-radius:24px;padding:2px;z-index:-1;
+ background:conic-gradient(from var(--a),transparent 0 55%,var(--c),var(--b),transparent 90%);animation:ba 5s linear infinite;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+@keyframes ba{to{--a:360deg}}
+@media(max-width:900px){.master{grid-template-columns:1fr;padding:20px}}
+.badge{position:absolute;top:12px;right:16px;font-size:10px;border:1px solid rgba(134,0,255,.5);padding:3px 9px;border-radius:10px;background:#0008;animation:bd 2.4s infinite}
+@keyframes bd{50%{box-shadow:0 0 12px var(--c)}}
+
+/* Cột trái */
+.col-l{display:flex;flex-direction:column;align-items:center}
+.title{font-size:clamp(20px,5vw,26px);font-weight:bold;letter-spacing:5px;color:#fff;text-shadow:0 0 12px var(--c),0 0 24px var(--b);margin:6px 0 10px;animation:gl 4s infinite}
+@keyframes gl{0%,94%,100%{transform:none}96%{transform:skew(6deg);text-shadow:3px 0 #f0f,-3px 0 var(--c)}98%{transform:skew(-6deg);text-shadow:-3px 0 #f0f,3px 0 var(--c)}}
+.orbit{position:relative;width:100%;max-width:340px;aspect-ratio:1;margin:0 auto}
+.orbit .core{position:absolute;inset:0;margin:auto;width:56%;filter:drop-shadow(0 0 16px var(--c));animation:flo 4s ease-in-out infinite}
+@keyframes flo{50%{transform:translateY(-10px) rotate(4deg)}}
+.orbit .core *{stroke-linejoin:round}
+.ring{position:absolute;border-radius:50%;border:1px dashed rgba(134,0,255,.5);animation:spin 20s linear infinite}
+.ring:nth-child(1){inset:4%}.ring:nth-child(2){inset:14%;border-style:solid;border-color:rgba(255,0,238,.5);animation-duration:14s;animation-direction:reverse}
+.ring:nth-child(3){inset:24%;border-color:rgba(134,0,255,.25);animation-duration:30s}
+.ring::after{content:'';position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 12px 3px var(--c)}
+.pulse{position:absolute;inset:0;margin:auto;width:40%;aspect-ratio:1;border-radius:50%;border:2px solid var(--c);animation:pl 3s ease-out infinite;opacity:0}
+.pulse:nth-of-type(2){animation-delay:1.5s}
+@keyframes pl{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+
+.steps{display:flex;align-items:center;width:100%;margin:18px 0 12px}
+.st{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;letter-spacing:1px;color:#912fa8;transition:.4s}
+.st i{width:22px;height:22px;border-radius:50%;border:2px solid #53165c;display:grid;place-items:center;font-style:normal;font-size:11px;transition:.4s}
+.st.on{color:#fff}.st.on i{border-color:var(--c);background:var(--c);color:#000;box-shadow:0 0 14px var(--c)}
+.bar{flex:1;height:2px;background:#53165c;margin:0 6px 16px;position:relative;overflow:hidden}
+.bar::after{content:'';position:absolute;inset:0;background:var(--c);transform:translateX(-100%);transition:transform .8s}.bar.on::after{transform:none}
+.info{width:100%;background:rgba(212,0,255,.06);border-left:4px solid var(--c);padding:14px;font-size:12.5px;line-height:1.7;color:#f7a0ff}
+
+/* Cột phải */
+.col-r{display:flex;flex-direction:column;gap:16px}
+.head{background:linear-gradient(90deg,#240222,#3d043a);padding:14px;border-radius:10px;border:1px solid var(--c);text-align:center;font-weight:bold;color:#fff;text-shadow:0 0 10px var(--c);position:relative;overflow:hidden}
+.head::after,.btn::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:sh 3.4s infinite}
+@keyframes sh{0%,60%{left:-60%}100%{left:130%}}
+.term{flex:1;min-height:190px;background:#0e010d;border:2px solid #ff00dd;border-radius:10px;padding:16px;box-shadow:inset 0 0 20px rgba(255,0,238,.5)}
+.ll{font-size:12.5px;margin-bottom:7px;text-shadow:0 0 5px var(--c);animation:in .4s}
+@keyframes in{from{opacity:0;transform:translateX(-8px)}}
+.ok{color:var(--ok)}.wn{color:#fc0}
+.cur{display:inline-block;width:8px;height:14px;background:var(--c);vertical-align:middle;animation:bl 1s infinite}
+@keyframes bl{50%{opacity:0}}
+.btn{position:relative;overflow:hidden;background:linear-gradient(135deg,#cc00b1,#d400ff);color:#fff;border:2px solid var(--c);padding:17px;font-weight:bold;font-size:15px;letter-spacing:2px;cursor:pointer;border-radius:9px;transition:.3s;box-shadow:0 0 18px rgba(134,0,255,.45);text-transform:uppercase}
+.btn:hover:not(:disabled){background:var(--c);color:#000;box-shadow:0 0 34px var(--c);transform:translateY(-2px)}
+.btn:disabled{background:#200220;border-color:#630066;color:#862a96;cursor:not-allowed;box-shadow:none}.btn:disabled::after{display:none}
+.vault{display:none;text-align:center;animation:su .6s cubic-bezier(.2,1.2,.3,1)}
+@keyframes su{from{transform:translateY(30px) scale(.95);opacity:0}}
+.key{background:rgba(134,0,255,.1);border:2px dashed var(--c);padding:18px;font-size:clamp(16px,4.6vw,22px);font-weight:bold;color:#fff;border-radius:10px;margin:10px 0 12px;text-shadow:0 0 14px var(--c);word-break:break-all;animation:kg 2s infinite}
+@keyframes kg{50%{box-shadow:0 0 26px rgba(134,0,255,.5)}}
+.row{display:flex;gap:10px}.row .btn{flex:1;padding:12px}
+.hist{margin-top:12px;font-size:11px;color:#c97fd8;text-align:left}
+.hist div{padding:6px 0;border-top:1px solid #3f0a44;display:flex;justify-content:space-between;gap:8px;word-break:break-all}
+#toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,40px);background:#340236;border:1px solid var(--c);color:#fff;padding:12px 20px;border-radius:24px;font-size:13px;opacity:0;transition:.4s;z-index:200;box-shadow:0 0 24px rgba(134,0,255,.4)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+/* ===== INTRO ĐẸP HƠN ===== */
+.vg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 40%,rgba(6,0,12,.88))}
+.ch{display:inline-block;opacity:0;filter:blur(12px);transform:translateY(26px) scale(1.5);transition:all .9s cubic-bezier(.2,.9,.2,1);transition-delay:calc(var(--i)*.09s + .7s)}
+#intro.s2 .ch{opacity:1;filter:none;transform:none}
+#intro.s2 .logo{animation:lp 3s ease-in-out 2.4s infinite}
+@keyframes lp{50%{filter:drop-shadow(0 0 22px #e6c8ff) drop-shadow(0 0 70px #ff00ee)}}
+.hn.on svg{animation:hp 2s ease-in-out infinite}
+@keyframes hp{50%{transform:scale(1.08);filter:drop-shadow(0 0 18px var(--c)) drop-shadow(0 0 34px var(--b))}}
+.ln.on::before{content:'';position:absolute;top:-1px;left:-10px;width:12px;height:4px;border-radius:2px;background:#fff;box-shadow:0 0 10px #fff;animation:tv 1.3s linear infinite;z-index:1}
+@keyframes tv{to{left:100%}}
+.cap{position:absolute;left:0;right:0;top:calc(50% + clamp(74px,17vw,116px));text-align:center;font-size:12px;letter-spacing:.35em;color:#e6d0ff;text-shadow:0 0 10px var(--c);opacity:0;transition:opacity .8s .6s}
+#intro.s3 .cap{opacity:1}
+.load{position:absolute;left:50%;bottom:8%;width:min(72vw,380px);transform:translateX(-50%);font-size:10px;letter-spacing:.2em;color:#cfa8ff}
+.lt{display:flex;justify-content:space-between;margin-bottom:8px}
+.lb{height:4px;border-radius:4px;background:rgba(184,107,255,.18);overflow:hidden}
+.lb i{display:block;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,var(--b),var(--c),#fff);box-shadow:0 0 14px var(--c);transition:width .15s linear}
+/* ===== CHÌA KHÓA ===== */
+.master.show .orbit .core{animation:kpop 1.3s .4s cubic-bezier(.2,1.4,.3,1) backwards,flo 4s 1.7s ease-in-out infinite}
+@keyframes kpop{from{opacity:0;transform:scale(.2) rotate(-120deg)}}
+.hexk{animation:spin 30s linear infinite;transform-origin:0 0}
+/* ===== LÀM ĐẸP ===== */
+body,.info,.head,.btn,.title,.badge,.st,#toast,.brand{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif}
+.term,.ll,.key,.hist,.boot,.hn span{font-family:ui-monospace,'SF Mono',Consolas,'Courier New',monospace}
+.master{border-radius:28px;background:linear-gradient(160deg,rgba(56,10,55,.72),rgba(20,3,19,.8));box-shadow:0 30px 80px rgba(160,0,145,.35),0 0 60px rgba(212,0,255,.18),inset 0 1px 0 rgba(255,255,255,.12)}
+.master::before{border-radius:30px}
+.title{font-weight:800;letter-spacing:.32em;margin-right:-.32em;background:linear-gradient(90deg,#fff,#d17fff 40%,#ff4dec 70%,#fff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;filter:drop-shadow(0 0 14px rgba(134,0,255,.55));animation:tx 6s linear infinite}
+@keyframes tx{to{background-position:200% center}}
+.badge{font-size:10px;letter-spacing:1px;background:rgba(58,0,60,.7);border-color:rgba(134,0,255,.35)}
+.badge::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-right:6px;box-shadow:0 0 8px var(--ok)}
+.orbit::before{content:'';position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(rgba(134,0,255,.55) 0 .5deg,transparent .5deg 6deg);-webkit-mask:radial-gradient(circle,transparent 61%,#000 62%,#000 65%,transparent 66%);mask:radial-gradient(circle,transparent 61%,#000 62%,#000 65%,transparent 66%);animation:spin 70s linear infinite}
+.orbit::after{content:'';position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,rgba(184,0,255,.28),rgba(200,0,187,.08) 55%,transparent 70%);animation:pg 5s infinite alternate}
+.orbit .core,.ring,.pulse{z-index:1}
+.sp{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px var(--c);opacity:0;animation:tw 3.2s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1.4) translateY(-10px)}}
+.st i{width:28px;height:28px;font-size:12px;font-weight:700;background:rgba(58,0,60,.8)}
+.st{font-size:10.5px;letter-spacing:.12em}
+.info{border:1px solid rgba(134,0,255,.2);border-left:1px solid rgba(134,0,255,.2);border-radius:16px;background:linear-gradient(135deg,rgba(212,0,255,.1),rgba(100,0,93,.1));padding:14px 16px;line-height:1.5}
+.info .it{display:block;color:#fff;letter-spacing:.2em;font-size:11px;margin-bottom:6px}
+.info div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid rgba(134,0,255,.1)}
+.info em{font-style:normal;color:#fff}
+.dt{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:8px;box-shadow:0 0 8px var(--ok);animation:bd 2s infinite}
+.head{border-radius:14px;font-size:14px;letter-spacing:.35em;border-color:rgba(134,0,255,.5);background:linear-gradient(90deg,rgba(36,2,34,.9),rgba(86,6,83,.9),rgba(36,2,34,.9))}
+.term{border-radius:16px;border:1px solid rgba(255,0,246,.55);background:linear-gradient(180deg,#1d021e,#10010f)}
+.dots{display:flex;gap:6px;align-items:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid #3f0a44}
+.dots i{width:10px;height:10px;border-radius:50%;background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.dots span{margin-left:8px;font-size:11px;color:#ae4fc4}
+.btn{border-radius:14px;border:1px solid rgba(220,170,255,.7);background:linear-gradient(180deg,#cb22ff,#e000ce);box-shadow:0 8px 24px rgba(254,0,255,.45),inset 0 1px 0 rgba(255,255,255,.55);text-shadow:0 1px 6px rgba(120,0,104,.6)}
+.btn:hover:not(:disabled){text-shadow:none;background:linear-gradient(180deg,#d59fff,#8600ff)}
+.key{border-style:solid;border-radius:16px;background:linear-gradient(135deg,rgba(134,0,255,.16),rgba(255,0,238,.16));letter-spacing:.08em}
+.hist div{border-top:1px solid rgba(134,0,255,.12)}
+/* ===== TỐI ƯU HIỆU NĂNG ===== */
+.glow{filter:none;animation:none;opacity:.8}
+.scan{top:0;animation:sc2 4s linear infinite;will-change:transform}
+@keyframes sc2{from{transform:translateY(-10vh)}to{transform:translateY(110vh)}}
+.aurora{filter:none;will-change:transform}
+#intro.done{filter:none}
+.master{backdrop-filter:none;background:linear-gradient(160deg,rgba(12,6,30,.95),rgba(5,2,14,.97));will-change:auto}
+.master::before{animation:none;background:conic-gradient(from 200deg,transparent 0 40%,var(--c),var(--b),transparent 85%)}
+.title{filter:none;animation:none}
+.orbit .core{filter:none;will-change:transform}
+.ring,.orbit::before,.hexk{will-change:transform}
+.head::after,.btn::after{left:0;animation:sh2 3.4s infinite;will-change:transform}
+@keyframes sh2{0%,60%{transform:translateX(-150%) skewX(-20deg)}100%{transform:translateX(400%) skewX(-20deg)}}
+.key{animation:none}
+#intro.s2 .logo{animation:none}
+.hn.on svg{animation:none}
+.master:not(.show),.master:not(.show) *,.master:not(.show)::before{animation-play-state:paused!important}
+@media(max-width:900px){.scan,.g2{display:none}}
+/* ===== KHÔI PHỤC HIỆU ỨNG (bản nhẹ) ===== */
+.glow{animation:pg 8s infinite alternate;will-change:transform,opacity;opacity:1}
+@media(max-width:900px){.g2{display:block}}
+.master::before{display:none}
+.bd{position:absolute;inset:-2px;border-radius:30px;padding:2px;overflow:hidden;z-index:-1;pointer-events:none;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.bd::before{content:'';position:absolute;left:50%;top:50%;width:300%;aspect-ratio:1;margin-left:-150%;background:conic-gradient(from 0deg,transparent 0 55%,var(--c),var(--b),transparent 90%);transform:translateY(-50%) rotate(0);animation:bds 5s linear infinite;will-change:transform}
+@keyframes bds{to{transform:translateY(-50%) rotate(360deg)}}
+.title{animation:tx 6s linear infinite}
+.orbit .core{filter:drop-shadow(0 0 12px var(--c))}
+.key{animation:kg 2s infinite}
+#intro.s2 .logo{animation:lp2 3s ease-in-out 2.4s infinite}
+@keyframes lp2{50%{transform:translate(-50%,-50%) scale(1.05)}}
+.hn.on svg{animation:hp2 2s ease-in-out infinite}
+@keyframes hp2{50%{transform:scale(1.08)}}
+/* ===== BẢN ĐỦ HIỆU ỨNG (tự giảm nếu máy yếu) ===== */
+.master{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:linear-gradient(160deg,rgba(14,8,36,.62),rgba(5,2,14,.7))}
+.aurora{filter:blur(6px)}
+@media(max-width:900px){.scan{display:block}}
+html.lite .master{backdrop-filter:none;-webkit-backdrop-filter:none;background:linear-gradient(160deg,rgba(12,6,30,.95),rgba(5,2,14,.97))}
+html.lite .aurora{filter:none}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+<div class="scan"></div><div class="glow g1"></div><div class="glow g2"></div>
+
+<!-- ============ INTRO ============ -->
+<div id="intro">
+  <canvas id="fx"></canvas>
+  <div class="vg"></div>
+  <div class="aurora"></div>
+  <svg class="hive" width="100%" height="100%"><defs>
+    <pattern id="hx" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(.9)">
+      <path d="M28 0 56 16v32L28 64 0 48V16zM28 64v33M0 48 0 81M56 48v33" fill="none" stroke="rgba(214,0,255,.35)" stroke-width="1.2"/></pattern></defs>
+    <rect width="100%" height="100%" fill="url(#hx)"/></svg>
+
+  <div class="tri" style="left:18%;top:30%"></div><div class="tri" style="left:78%;top:24%;animation-delay:-2s"></div>
+  <div class="tri" style="left:70%;top:62%;animation-delay:-4s"></div><div class="tri" style="left:26%;top:58%;animation-delay:-1s"></div>
+
+  <svg class="stage hud" viewBox="-200 -200 400 400" fill="none" stroke="rgba(134,0,255,.55)">
+    <g class="r1"><circle r="180" stroke-dasharray="3 9"/></g>
+    <g class="r2"><circle r="150" stroke-width="2" stroke-dasharray="90 30 10 30"/></g>
+    <g class="r3"><circle r="166" stroke-width="9" stroke="rgba(190,120,255,.45)" stroke-dasharray="1.2 16.1"/></g>
+    <g class="r3"><circle r="120" stroke="rgba(254,0,255,.6)" stroke-dasharray="2 6"/></g>
+  </svg>
+  <svg class="stage logo" viewBox="-80 -80 160 160">
+    <path d="M0-62L54-31L54 31L0 62L-54 31L-54-31Z"/>
+    <path d="M44 0L22 38L-22 38L-44 0L-22-38L22-38Z"/>
+    <path d="M-14-26V20H20V10H-4V-26Z"/>
+    <path d="M0-79L7-71L0-63L-7-71Z"/>
+    <path d="M0 79L7 71L0 63L-7 71Z"/>
+  </svg>
+  <div class="brand"><b><span class="ch" style="--i:0">L</span><span class="ch" style="--i:1">O</span><span class="ch" style="--i:2">N</span><span class="ch" style="--i:3">G</span><span class="ch" style="--i:4">R</span><span class="ch" style="--i:5">D</span><span class="ch" style="--i:6">E</span><span class="ch" style="--i:7">Z</span></b><i>KEY PORTAL</i></div>
+
+  <div class="hexrow">
+    <div class="hn" id="h1"><svg viewBox="0 0 60 60"><polygon points="30,2 56,16 56,44 30,58 4,44 4,16"/><text x="30" y="37">◈</text></svg><span>XÁC MINH</span></div>
+    <div class="ln" id="l1"></div>
+    <div class="hn" id="h2"><svg viewBox="0 0 60 60"><polygon points="30,2 56,16 56,44 30,58 4,44 4,16"/><text x="30" y="37">⟁</text></svg><span>BYPASS</span></div>
+    <div class="ln" id="l2"></div>
+    <div class="hn" id="h3"><svg viewBox="0 0 60 60"><polygon points="30,2 56,16 56,44 30,58 4,44 4,16"/><text x="30" y="37">✦</text></svg><span>KEY</span></div>
+  </div>
+
+  <div class="cap" id="cap"></div>
+  <div class="boot" id="boot"></div>
+  <div class="load"><div class="lt"><span id="lmsg">KHỞI TẠO LÕI HỆ THỐNG</span><span id="lpct">0%</span></div><div class="lb"><i id="lfill"></i></div></div>
+  <button id="skip">BỎ QUA</button>
+</div>
+
+<!-- ============ TRANG CHÍNH ============ -->
+<div class="master" id="master">
+  <div class="bd"></div>
+  <div class="badge">SECURE CONNECTION: ESTABLISHED</div>
+
+  <div class="col-l">
+    <div class="title">LONGRDEZ HUB</div>
+    <div class="orbit">
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="pulse"></div><div class="pulse"></div>
+      <svg class="core" viewBox="-50 -50 100 100">
+        <defs>
+          <linearGradient id="kg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf0ff"/><stop offset=".45" stop-color="#c88cff"/><stop offset="1" stop-color="#7a2be0"/></linearGradient>
+          <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a0f4d" stop-opacity=".92"/><stop offset="1" stop-color="#0d0420" stop-opacity=".92"/></linearGradient>
+          <linearGradient id="sh" gradientUnits="userSpaceOnUse" x1="-14" y1="0" x2="14" y2="0">
+            <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+            <animateTransform attributeName="gradientTransform" type="translate" from="-45 0" to="45 0" dur="3.6s" repeatCount="indefinite"/>
+          </linearGradient>
+          <g id="ks">
+            <path fill-rule="evenodd" d="M0-43a17 17 0 1 1 0 34a17 17 0 1 1 0-34Z M0-33a7 7 0 1 1 0 14a7 7 0 1 1 0-14Z"/>
+            <circle cx="0" cy="-45" r="3"/>
+            <rect x="-4" y="-10" width="8" height="54" rx="2"/>
+            <rect x="-8" y="-4" width="16" height="4" rx="2"/>
+            <rect x="-7" y="4" width="14" height="3" rx="1.5"/>
+            <path d="M4 26h13v8h-7v4h7v8H4z"/>
+          </g>
+        </defs>
+        <polygon points="0,-44 38,-22 38,22 0,44 -38,22 -38,-22" fill="url(#hg)" stroke="#c88cff" stroke-width="1.6"/>
+        <g class="hexk"><polygon points="0,-44 38,-22 38,22 0,44 -38,22 -38,-22" fill="none" stroke="#e6c8ff" stroke-opacity=".5" stroke-width=".8" stroke-dasharray="2 4" transform="scale(.9)"/></g>
+        <g transform="rotate(40) scale(.62) translate(0 -3)">
+          <use href="#ks" fill="url(#kg)" stroke="#fff" stroke-opacity=".7" stroke-width="1.2"/>
+          <use href="#ks" fill="url(#sh)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="steps">
+      <div class="st on" id="s1"><i>1</i>XÁC MINH</div><div class="bar" id="b1"></div>
+      <div class="st" id="s2"><i>2</i>BYPASS</div><div class="bar" id="b2"></div>
+      <div class="st" id="s3"><i>3</i>NHẬN KEY</div>
+    </div>
+    <div class="info">
+      <b class="it">TRẠNG THÁI HỆ THỐNG</b>
+      <div><span><u class="dt"></u>Máy chủ</span><em>Hoạt động · 12ms</em></div>
+      <div><span><u class="dt"></u>Phiên bản</span><em>v5.0 Aurora Blue</em></div>
+      <div><span><u class="dt"></u>Hiệu lực key</span><em>24 giờ / 1 thiết bị</em></div>
+    </div>
+  </div>
+
+  <div class="col-r">
+    <div class="head">TERMINAL CẤP KEY</div>
+    <div class="term" id="term">
+      <div class="dots"><i></i><i></i><i></i><span>longrdez@hub:~</span></div>
+      <div id="logs"></div>
+      <div class="ll"><span id="typing">Sẵn sàng nhận diện thiết bị...</span><span class="cur"></span></div>
+    </div>
+    <button class="btn" id="go" onclick="startExecution()">Bắt đầu lấy key</button>
+    <div class="vault" id="vault">
+      <div style="font-size:12px">&gt; KEY CỦA BẠN ĐÃ SẴN SÀNG &lt;</div>
+      <div class="key" id="finalKey">-</div>
+      <div class="row">
+        <button class="btn" onclick="copyKey()">Sao chép</button>
+        <button class="btn" style="background:#33002c;border-color:#ff00dd;color:#d400ff" onclick="toast('Đã chuyển hướng Discord!')">Discord</button>
+      </div>
+      <div class="hist" id="hist"></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const DPR=1;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== 1. MƯA MA TRẬN (nhẹ, ~20fps) ===== */
+const mc=$('matrix'),mx=mc.getContext('2d');let drops=[];
+function rm(){mc.width=innerWidth;mc.height=innerHeight;drops=Array(Math.floor(mc.width/14)).fill(1)}
+rm();addEventListener('resize',rm);
+const chars='01LONGRDEZX9876543210ABCDEF<>/\\'.split('');
+setInterval(()=>{
+  if(document.hidden||!document.getElementById('master').classList.contains('show'))return;
+  mx.fillStyle='rgba(10,1,9,.1)';mx.fillRect(0,0,mc.width,mc.height);
+  mx.fillStyle='#8600ff';mx.font='14px monospace';
+  for(let i=0;i<drops.length;i++){
+    mx.fillText(chars[Math.random()*chars.length|0],i*14,drops[i]*14);
+    if(drops[i]*14>mc.height&&Math.random()>.97)drops[i]=0;drops[i]++;
+  }
+},50);
+
+/* ===== 2. INTRO: TIA SÁNG + BỤI + CHUỖI CẢNH ===== */
+const intro=$('intro'),fc=$('fx'),fx=fc.getContext('2d');
+let W,H,running=true,T0=performance.now();
+function rf(){W=innerWidth;H=innerHeight;fc.width=W*DPR;fc.height=H*DPR;fx.setTransform(DPR,0,0,DPR,0,0)}
+rf();addEventListener('resize',rf);
+const dust=Array.from({length:40},()=>({x:Math.random(),y:Math.random(),v:.02+Math.random()*.06,s:Math.random()*2+.5}));
+function loop(now){
+  if(!running)return;
+  const t=(now-T0)/1000;
+  fx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H*.45,burst=Math.min(1,t/1.5),fade=t>5.6?Math.max(0,1-(t-5.6)/1.2):1;
+  const R=Math.min(W,H)*.5;
+  // quầng sáng
+  const gr=R*(.15+.55*burst)*(1+Math.sin(t*3)*.04);
+  const g=fx.createRadialGradient(cx,cy,0,cx,cy,gr);
+  g.addColorStop(0,`rgba(255,255,255,${.9*fade})`);g.addColorStop(.25,`rgba(134,0,255,${.5*fade})`);g.addColorStop(1,'rgba(255,0,238,0)');
+  fx.fillStyle=g;fx.fillRect(0,0,W,H);
+  // tia nổ
+  fx.lineWidth=1.2;
+  for(let i=0;i<36;i++){
+    const a=i/36*Math.PI*2+t*.15,l=(R*.1+(Math.sin(i*12.9+t*5)*.5+.5)*R*.5)*burst,r0=R*.12;
+    fx.strokeStyle=`rgba(214,150,255,${(.55*fade)*(1-burst*.3)})`;
+    fx.beginPath();fx.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);fx.lineTo(cx+Math.cos(a)*(r0+l),cy+Math.sin(a)*(r0+l));fx.stroke();
+  }
+  // bụi sáng bay lên
+  fx.fillStyle='#dbbbff';
+  for(const d of dust){d.y-=d.v*.016;if(d.y<0)d.y=1;fx.globalAlpha=.25+.5*Math.abs(Math.sin(t*2+d.x*9));fx.fillRect(d.x*W,d.y*H,d.s,d.s)}
+  fx.globalAlpha=1;
+  // sóng xung kích
+  for(const d of [1.4,1.7]){const k=(t-d)/1.6;if(k>0&&k<1){fx.strokeStyle=`rgba(235,205,255,${(1-k)*.7})`;fx.lineWidth=1+3*(1-k);fx.beginPath();fx.arc(cx,cy,R*1.3*k,0,6.283);fx.stroke()}}
+  // vệt sáng ngang
+  if(t>1.2){const f=Math.min(1,(t-1.2)/.6)*fade*(.85+Math.sin(t*4)*.1),lg=fx.createLinearGradient(cx-R*1.3,0,cx+R*1.3,0);lg.addColorStop(0,'rgba(184,107,255,0)');lg.addColorStop(.5,`rgba(255,255,255,${.85*f})`);lg.addColorStop(1,'rgba(184,107,255,0)');fx.fillStyle=lg;fx.fillRect(cx-R*1.3,cy-1.5,R*2.6,3)}
+  // hạt quay quanh logo
+  if(t>2.2&&fade>0){for(let i=0;i<28;i++){const a=t*(.6+(i%4)*.15)+i*.9,rr=R*(.34+(i%5)*.03);fx.globalAlpha=(.4+.6*Math.abs(Math.sin(t*3+i)))*fade;fx.fillStyle=i%3?'#e9d3ff':'#ff9cf5';fx.beginPath();fx.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.38,1.7,0,6.283);fx.fill()}fx.globalAlpha=1}
+  // ánh sáng nền giai đoạn 3
+  if(t>5.4){const q=Math.min(1,(t-5.4)/1.2),g3=fx.createRadialGradient(cx,H*.5,0,cx,H*.5,R*.7);g3.addColorStop(0,`rgba(184,107,255,${.28*q*(1+Math.sin(t*2)*.15)})`);g3.addColorStop(1,'rgba(184,107,255,0)');fx.fillStyle=g3;fx.fillRect(0,0,W,H)}
+  // chớp trắng
+  if(t>1.3&&t<2.1){fx.fillStyle=`rgba(255,255,255,${Math.max(0,1-Math.abs(t-1.5)*2.2)*.8})`;fx.fillRect(0,0,W,H)}
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// Dòng boot nhỏ góc trái
+const bootTxt=['LONGRDEZ HUB // SYSTEM','initializing core...','linking secure channel...','device handshake: ok'];
+let bi=0;const bt=setInterval(()=>{$('boot').innerHTML+=(bootTxt[bi++]||'')+'<br>';if(bi>=bootTxt.length)clearInterval(bt)},700);
+
+const timers=[];
+const at=(ms,fn)=>timers.push(setTimeout(fn,ms));
+const lt=setInterval(()=>{
+  const k=Math.min(1,(performance.now()-T0)/9900),p=Math.round((1-Math.pow(1-k,1.6))*100);
+  $('lfill').style.width=p+'%';$('lpct').textContent=p+'%';
+  $('lmsg').textContent=p<20?'KHỞI TẠO LÕI HỆ THỐNG':p<45?'NẠP MODULE ĐỒ HỌA':p<70?'KẾT NỐI MÁY CHỦ':p<95?'XÁC THỰC THIẾT BỊ':'SẴN SÀNG';
+},100);
+const CAP=['ĐANG XÁC MINH THIẾT BỊ...','ĐANG VƯỢT KIỂM TRA...','SẴN SÀNG CẤP KEY'];
+function probe(){let n=0,t0=performance.now();(function f(now){n++;if(now-t0<1800)requestAnimationFrame(f);else if(n/((now-t0)/1000)<42&&!document.hidden)document.documentElement.classList.add('lite')})(t0);}
+at(3000,probe);
+at(1500,()=>intro.classList.add('s2'));
+at(5600,()=>{intro.classList.remove('s2');intro.classList.add('s3')});
+at(6400,()=>{$('h1').classList.add('on');$('cap').textContent=CAP[0]});
+at(7100,()=>$('l1').classList.add('on'));
+at(7700,()=>{$('h2').classList.add('on');$('cap').textContent=CAP[1]});
+at(8400,()=>$('l2').classList.add('on'));
+at(9000,()=>{$('h3').classList.add('on');$('cap').textContent=CAP[2]});
+at(10200,endIntro);
+function endIntro(){
+  if(intro.classList.contains('done'))return;
+  timers.forEach(clearTimeout);clearInterval(bt);clearInterval(lt);$('lfill').style.width='100%';
+  intro.classList.add('done');$('master').classList.add('show');setTimeout(probe,1300);
+  setTimeout(()=>{running=false},1100);
+}
+$('skip').onclick=endIntro;
+if(reduce)endIntro();
+
+/* ===== NGHIÊNG 3D (nhẹ: rAF + chỉ transform) ===== */
+if(matchMedia('(hover:hover)').matches&&!reduce){
+  let tx=0,ty=0,raf=0;const mm=$('master');
+  addEventListener('mousemove',e=>{
+    tx=(e.clientX/innerWidth-.5)*2;ty=(e.clientY/innerHeight-.5)*2;
+    if(raf||!mm.classList.contains('show'))return;
+    raf=requestAnimationFrame(()=>{raf=0;mm.style.transition='transform .25s ease-out';mm.style.transform=`perspective(1200px) rotateY(${tx*3}deg) rotateX(${-ty*3}deg)`});
+  },{passive:true});
+}
+/* ===== 4. TERMINAL + CẤP KEY ===== */
+const logs=$('logs'),typing=$('typing'),go=$('go');
+function setStep(n){
+  [1,2,3].forEach(i=>$('s'+i).classList.toggle('on',i<=n));
+  [1,2].forEach(i=>$('b'+i).classList.toggle('on',i<n));
+}
+function addLog(t,c=''){const d=document.createElement('div');d.className='ll '+c;d.textContent='> '+t;logs.appendChild(d)}
+function typeFx(text,speed,cb){
+  typing.textContent='';let i=0;
+  const iv=setInterval(()=>{
+    typing.textContent+=text.charAt(i++);
+    if(i>=text.length){clearInterval(iv);setTimeout(()=>{addLog(text,'ok');typing.textContent='';cb&&cb()},300)}
+  },speed);
+}
+function startExecution(){
+  go.disabled=true;logs.innerHTML='';setStep(1);
+  addLog('Khởi tạo giao thức bảo mật...','wn');
+  typeFx('Đang lấy HWID thiết bị (Android/PC)...',30,()=>{
+    typeFx('Kết nối Server LONGRDEZ... OK',25,()=>{
+      setStep(2);
+      typeFx('Kiểm tra trạng thái Bypass Linkvertise...',40,()=>{
+        let p=0;
+        const pv=setInterval(()=>{
+          p+=10;const n=p/10;
+          typing.textContent=`Đang xử lý thuật toán [${'|'.repeat(n)}${' '.repeat(10-n)}] ${p}%`;
+          if(p>=100){
+            clearInterval(pv);typing.textContent='';
+            addLog('Bypass xác thực thành công!','ok');
+            typeFx('Đang sinh key mã hóa SHA-256...',30,()=>{
+              setStep(3);
+              const k='LRZ-'+Math.random().toString(36).substring(2,12).toUpperCase()+'-VIP';
+              $('finalKey').textContent=k;saveKey(k);
+              go.style.display='none';$('vault').style.display='block';
+            });
+          }
+        },180);
+      });
+    });
+  });
+}
+
+/* ===== 5. KHO KEY (lưu 24h trên máy) ===== */
+function saveKey(k){
+  try{
+    const a=JSON.parse(localStorage.getItem('lrz_keys')||'[]').filter(x=>x.exp>Date.now());
+    a.unshift({k,exp:Date.now()+864e5});localStorage.setItem('lrz_keys',JSON.stringify(a.slice(0,5)));
+  }catch(e){}
+  renderHist();
+}
+function renderHist(){
+  try{
+    const a=JSON.parse(localStorage.getItem('lrz_keys')||'[]').filter(x=>x.exp>Date.now());
+    $('hist').innerHTML=a.length?'<b style="color:#fff">KHO KEY</b>'+a.map(x=>{
+      const h=Math.max(1,Math.round((x.exp-Date.now())/36e5));
+      return `<div><span>${x.k}</span><span>còn ${h}h</span></div>`}).join(''):'';
+  }catch(e){}
+}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2600)}
+function copyKey(){
+  const k=$('finalKey').textContent;
+  (navigator.clipboard?navigator.clipboard.writeText(k):Promise.reject())
+    .then(()=>toast('Đã sao chép key! Dán vào Delta Executor nhé.'))
+    .catch(()=>toast('Không sao chép được, hãy bôi đen và copy thủ công.'));
+}
+renderHist();
+(function(){const o=document.querySelector('.orbit');for(let i=0;i<16;i++){const e=document.createElement('span');e.className='sp';e.style.left=(8+Math.random()*84)+'%';e.style.top=(8+Math.random()*84)+'%';e.style.animationDelay=(Math.random()*3.2)+'s';o.appendChild(e)}})();
+</script>
+</body>
+</html>
